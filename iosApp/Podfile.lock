@@ -1,0 +1,16 @@
+PODS:
+  - composeApp (1.0)
+
+DEPENDENCIES:
+  - composeApp (from `../composeApp`)
+
+EXTERNAL SOURCES:
+  composeApp:
+    :path: "../composeApp"
+
+SPEC CHECKSUMS:
+  composeApp: 0c778efb0336f3547f2dddca407fd03918c6951e
+
+PODFILE CHECKSUM: 9a2d2eae55c681cf6cae467986e5098daa0528ce
+
+COCOAPODS: 1.16.2
