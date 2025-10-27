@@ -69,13 +69,15 @@ fun AchievementsScreen(
                     ) {
                         if (a.achieved && a.iconUrl != null) {
                             // ✅ show actual unlocked icon
-                            KamelImage(
-                                resource = { asyncPainterResource(a.iconUrl) },
+                            KamelImage({ asyncPainterResource(a.iconUrl) },
                                 contentDescription = null,
-                                contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .size(40.dp)
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .clip(RoundedCornerShape(8.dp)),
+                                alignment = Alignment.Center,
+                                onFailure = { error -> println("Kamel failed: ${error.message}") },
+                                contentScale = ContentScale.Crop,
+                                contentAlignment = Alignment.Center
                             )
                         } else {
                             // ❓ show placeholder for locked achievements

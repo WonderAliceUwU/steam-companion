@@ -51,7 +51,7 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serialization")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines")
             implementation("io.github.aakira:napier:$napier")
-            implementation("media.kamel:kamel-image:1.0.8")
+            implementation("media.kamel:kamel-image-default:1.0.8")
         }
         androidMain.dependencies {
             implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
