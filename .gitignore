@@ -1,0 +1,65 @@
+ gitignore
+ # Existing entries - Good start!
+ local.properties
+ .gradle
+ .idea/
+ .kotlin/
+ .lock
+ .log
+
+ # --- Recommended Additions ---
+
+ # Build Artefacts
+ # Ignore all build directories project-wide, not just for composeApp
+ build/
+ # Also ignore any KMM build folders in the root
+ /build/
+
+ # IDE files
+ # More specific rules for .idea to keep some files versioned if needed
+ .idea/workspace.xml
+ .idea/gradle.xml
+ .idea/misc.xml
+ .idea/libraries/
+
+ # Various Reports
+ *.html
+ *.xml
+ *.txt
+ *.json
+
+ # Gradle cache
+ .gradle/
+ **/build-cache/
+
+ # Android Studio generated files
+ *.apk
+ *.aab
+ *.ap_
+ *.dex
+ *.iml
+ gen/
+ captures/
+ output/
+
+ # Dependency Lockfiles (if managed differently)
+ *.lockfile
+
+ # Keystore files (VERY IMPORTANT)
+ *.jks
+ *.keystore
+
+ # Google Services (if containing private keys)
+ # Usually, google-services.json is safe, but check for sensitive info.
+ # If it contains private keys, add it here.
+ # google-services.json
+
+ # iOS specific build files
+ iosApp/build/
+ iosApp/Pods/
+ iosApp/DerivedData/
+ *.xcworkspace
+
+ # macOS specific files
+ .DS_Store
+ **/.DS_Store
