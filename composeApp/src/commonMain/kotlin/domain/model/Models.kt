@@ -12,7 +12,10 @@ data class Game(
     val name: String,
     val playtimeMinutes: Int,
     val iconUrl: String?
-)
+) {
+    val coverUrl: String
+        get() = "https://cdn.akamai.steamstatic.com/steam/apps/$appId/library_600x900.jpg"
+}
 
 data class Achievement(
     val apiName: String,

@@ -3,7 +3,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:label="SteamCompanion"
-        android:icon="@drawable/ic_steam">
+        android:icon="@drawable/ic_steam"
+        android:theme="@android:style/Theme.NoTitleBar">
         <activity
             android:name=".MainActivity"
             android:exported="true">
