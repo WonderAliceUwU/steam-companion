@@ -20,7 +20,6 @@ build/
 
 # Various Reports
 *.html
-*.xml
 *.txt
 *.json
 
