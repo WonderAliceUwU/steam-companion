@@ -1,7 +1,9 @@
 package com.steamcompanion.presentation.ui.components
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -15,12 +17,14 @@ import io.kamel.image.asyncPainterResource
 @Composable
 fun Avatar(avatarUrl: String?, size: Dp = 64.dp) {
     if (avatarUrl != null) {
-        KamelImage(
-            resource = { asyncPainterResource(data = avatarUrl) },
-            contentDescription = null,
-            modifier = Modifier.size(size).clip(RoundedCornerShape(size * 0.2f)),
-            contentScale = ContentScale.Crop
-        )
+        GameCoverFrame{
+            KamelImage(
+                resource = { asyncPainterResource(data = avatarUrl) },
+                contentDescription = null,
+                modifier = Modifier.size(size).clip(RoundedCornerShape(size * 0.2f)),
+                contentScale = ContentScale.Crop
+            )
+        }
     } else {
         Box(
             Modifier.size(size).clip(RoundedCornerShape(size / 5))

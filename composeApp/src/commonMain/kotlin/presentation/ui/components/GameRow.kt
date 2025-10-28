@@ -1,8 +1,10 @@
 package com.steamcompanion.presentation.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,10 +24,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.steamcompanion.domain.model.Game
 import io.kamel.image.KamelImage
@@ -37,31 +41,17 @@ fun GameRow(game: Game, onClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).clickable { onClick() },
     ) {
         Row( verticalAlignment = Alignment.CenterVertically) {
-            Box(
+            GameCoverFrame(
                 modifier = Modifier
                     .width(134.dp)
                     .height(200.dp)
-                    .border(
-                        width = 2.dp,
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color(0xff4a4358),
-                                Color(0xff2c2834)
-                            )
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    .padding(1.5.dp)
             ) {
                 KamelImage(
                     { asyncPainterResource(data = game.coverUrl) },
                     contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(10.dp)),
-                    onFailure = { e -> println("Failed to load image: ${e.message}") },
+                    modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
-                    contentAlignment = Alignment.Center
+                    onFailure = { e -> println("Failed to load image: ${e.message}") }
                 )
             }
             Spacer(Modifier.width(12.dp))
@@ -74,5 +64,52 @@ fun GameRow(game: Game, onClick: () -> Unit) {
             }
             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
         }
+    }
+}
+
+
+@Composable
+fun GameCoverFrame(
+    modifier: Modifier = Modifier,
+    cornerRadius: Dp = 16.dp,
+    glowColors: List<Color> = listOf(
+        Color(0xFF6A5B7A), // top subtle violet highlight
+        Color.Transparent,
+    ),
+    overlayGradient: List<Color> = listOf(
+        Color(0x33000000), // soft dim top
+        Color.Transparent,
+        Color(0x66000000)  // stronger dark bottom shadow
+    ),
+    content: @Composable BoxScope.() -> Unit
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(cornerRadius))
+            .background(Color.Transparent) // dark neutral base background
+            .shadow(8.dp, RoundedCornerShape(cornerRadius))
+    ) {
+        // Main content (your image, etc.)
+        content()
+
+        // Lighting gradient overlay
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(
+                    Brush.verticalGradient(overlayGradient)
+                )
+        )
+
+        // Outer gradient border
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .border(
+                    width = 1.dp,
+                    brush = Brush.verticalGradient(glowColors),
+                    shape = RoundedCornerShape(cornerRadius)
+                )
+        )
     }
 }

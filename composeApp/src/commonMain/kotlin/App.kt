@@ -17,9 +17,9 @@ import data.CredentialsStorage
 
 val steamStoreGradient = Brush.linearGradient(
     colors = listOf(
-        Color(0xFF221C3A),
+        Color(0xFF080608),
         Color(0xFF1B1730),
-        Color(0xFF2E2650)
+        Color(0xFF2E2650),
     ),
     start = Offset.Zero,
     end = Offset.Infinite
