@@ -4,6 +4,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.21" apply false
     id("org.jetbrains.compose") version "1.9.1" apply false
     id("com.android.application") version "8.13.0" apply false
+    id("com.android.kotlin.multiplatform.library") version "8.13.0" apply false
+    id("com.android.lint") version "8.13.0" apply false
 }
 
 allprojects {
