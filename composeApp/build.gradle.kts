@@ -1,6 +1,4 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.gradle.jvm.toolchain.JavaLanguageVersion
-import org.gradle.api.tasks.compile.JavaCompile
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 plugins {
@@ -20,7 +18,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_21)
         }
     }
-    
+
     val xcf = XCFramework()
     listOf(
         iosX64(),
@@ -34,6 +32,11 @@ kotlin {
     }
 
     sourceSets {
+        all {
+            languageSettings {
+                optIn("kotlin.experimental.ExperimentalObjCName")
+            }
+        }
         val ktorVersion = "3.3.1"
         val coroutines = "1.10.2"
         val serialization = "1.9.0"
@@ -52,6 +55,8 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines")
             implementation("io.github.aakira:napier:$napier")
             implementation("media.kamel:kamel-image-default:1.0.8")
+            implementation("dev.chrisbanes.haze:haze:1.6.10")
+            implementation("dev.chrisbanes.haze:haze-materials:1.6.10")
         }
         androidMain.dependencies {
             implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
@@ -73,6 +78,16 @@ kotlin {
         framework {
             baseName = "composeApp"
             isStatic = true
+        }
+    }
+
+    targets.all {
+        compilations.all {
+            compileTaskProvider.configure {
+                compilerOptions {
+                    freeCompilerArgs.add("-Xexpect-actual-classes")
+                }
+            }
         }
     }
 }
@@ -102,13 +117,5 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
-    }
-}
-
-// Ensure Android JavaCompile tasks use JDK 21 even if source/target are 17
-// This allows building on machines with only Java 21 installed
-tasks.withType<JavaCompile>().configureEach {
-    javaCompiler = javaToolchains.compilerFor {
-        languageVersion.set(JavaLanguageVersion.of(21))
     }
 }

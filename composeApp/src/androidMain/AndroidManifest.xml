@@ -4,7 +4,7 @@
     <application
         android:label="SteamCompanion"
         android:icon="@drawable/ic_steam"
-        android:theme="@android:style/Theme.NoTitleBar">
+        android:theme="@style/Theme.App">
         <activity
             android:name=".MainActivity"
             android:exported="true">

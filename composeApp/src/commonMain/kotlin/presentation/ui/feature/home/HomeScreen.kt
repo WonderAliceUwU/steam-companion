@@ -21,13 +21,13 @@ import androidx.compose.ui.unit.dp
 import com.steamcompanion.data.steam.SteamRepositoryImpl
 
 @Composable
-fun HomeScreen(steamId: String, repo: SteamRepositoryImpl) {
+fun HomeScreen(modifier: Modifier, steamId: String, repo: SteamRepositoryImpl) {
     var name by remember { mutableStateOf("...") }
     LaunchedEffect(steamId) {
         name = repo.getProfile(steamId)?.name ?: "Unknown"
     }
     Column(
-        Modifier.fillMaxSize().padding(24.dp),
+        modifier.fillMaxSize().padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

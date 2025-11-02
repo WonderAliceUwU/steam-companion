@@ -1,12 +1,19 @@
 package com.steamcompanion.presentation.ui.feature.achievements
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,18 +33,23 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.steamcompanion.data.steam.SteamRepositoryImpl
 import com.steamcompanion.domain.model.Achievement
 import com.steamcompanion.domain.model.Game
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
+import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,67 +65,107 @@ fun AchievementsScreen(
     }
     val completed = achievements.count { it.achieved }
     val pct = if (achievements.isNotEmpty()) (completed * 100) / achievements.size else 0
-    Scaffold(topBar = { TopAppBar(title = { Text(game.name) }, navigationIcon = {
-        IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null) }
-    }) }) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
-            Text("Completion ${pct}% (${completed}/${achievements.size})", fontWeight = FontWeight.Bold)
-            Spacer(Modifier.size(8.dp))
-            LazyColumn(Modifier.fillMaxSize()) {
-                items(achievements) { a ->
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (a.achieved && a.iconUrl != null) {
-                            // ✅ show actual unlocked icon
-                            KamelImage({ asyncPainterResource(a.iconUrl) },
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(RoundedCornerShape(8.dp)),
-                                alignment = Alignment.Center,
-                                onFailure = { error -> println("Kamel failed: ${error.message}") },
-                                contentScale = ContentScale.Crop,
-                                contentAlignment = Alignment.Center
-                            )
-                        } else {
-                            // ❓ show placeholder for locked achievements
-                            Box(
-                                Modifier
-                                    .size(40.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    "?",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+
+    BoxWithConstraints {
+        val width = constraints.maxWidth.toFloat()
+        val scope = rememberCoroutineScope()
+        val offsetX = remember { Animatable(0f) }
+        val draggableState = rememberDraggableState { delta ->
+            scope.launch {
+                offsetX.snapTo(offsetX.value + delta)
+            }
+        }
+
+        Scaffold(
+            modifier = Modifier
+                .graphicsLayer {
+                    alpha = 1f - (offsetX.value / width).coerceIn(0f, 1f)
+                }
+                .offset {
+                    IntOffset(
+                        x = offsetX.value.roundToInt(),
+                        y = 0
+                    )
+                }
+                .draggable(
+                    orientation = Orientation.Horizontal,
+                    state = draggableState,
+                    onDragStopped = {
+                        scope.launch {
+                            if (offsetX.value > width / 4) {
+                                onBack()
+                            } else {
+                                offsetX.animateTo(0f, spring())
                             }
                         }
-
-                        Spacer(Modifier.size(12.dp))
-
-                        Column(Modifier.weight(1f)) {
-                            Text(
-                                a.title,
-                                fontWeight = if (a.achieved) FontWeight.SemiBold else FontWeight.Normal
-                            )
-                            a.description?.let {
-                                Text(
-                                    it,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    }
+                ),
+            topBar = { TopAppBar(title = { Text(game.name) }, navigationIcon = {
+                IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null) }
+            }) }
+        ) { padding ->
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp)
+            ) {
+                Text("Completion ${pct}% (${completed}/${achievements.size})", fontWeight = FontWeight.Bold)
+                Spacer(Modifier.size(8.dp))
+                LazyColumn(Modifier.fillMaxSize()) {
+                    items(achievements) { a ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (a.achieved && a.iconUrl != null) {
+                                KamelImage({ asyncPainterResource(a.iconUrl) },
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(RoundedCornerShape(8.dp)),
+                                    alignment = Alignment.Center,
+                                    onFailure = { error -> println("Kamel failed: ${error.message}") },
+                                    contentScale = ContentScale.Crop,
+                                    contentAlignment = Alignment.Center
                                 )
+                            } else {
+                                Box(
+                                    Modifier
+                                        .size(40.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        "?",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
-                        }
 
-                        if (a.achieved) {
-                            Text("✓", color = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.size(12.dp))
+
+                            Column(Modifier.weight(1f)) {
+                                Text(
+                                    a.title,
+                                    fontWeight = if (a.achieved) FontWeight.SemiBold else FontWeight.Normal
+                                )
+                                a.description?.let {
+                                    Text(
+                                        it,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                    )
+                                }
+                            }
+
+                            if (a.achieved) {
+                                Text("✓", color = MaterialTheme.colorScheme.primary)
+                            }
                         }
                     }
                 }
