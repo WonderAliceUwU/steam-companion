@@ -41,10 +41,12 @@ kotlin {
         val coroutines = "1.10.2"
         val serialization = "1.9.0"
         val napier = "2.7.1"
+        val multiplatformSettings = "1.1.1"
 
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
+            implementation(compose.material)
             implementation(compose.material3)
             implementation(compose.materialIconsExtended)
             implementation(compose.components.resources)
@@ -57,6 +59,7 @@ kotlin {
             implementation("media.kamel:kamel-image-default:1.0.8")
             implementation("dev.chrisbanes.haze:haze:1.6.10")
             implementation("dev.chrisbanes.haze:haze-materials:1.6.10")
+            implementation("com.russhwolf:multiplatform-settings-no-arg:$multiplatformSettings")
         }
         androidMain.dependencies {
             implementation("io.ktor:ktor-client-okhttp:$ktorVersion")

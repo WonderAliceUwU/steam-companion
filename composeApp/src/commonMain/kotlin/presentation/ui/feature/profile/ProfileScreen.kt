@@ -8,6 +8,10 @@ import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,6 +29,7 @@ import com.steamcompanion.presentation.ui.components.GameRow
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ProfileScreen(
     modifier: Modifier,
@@ -38,21 +43,37 @@ fun ProfileScreen(
     var avatar by remember { mutableStateOf<String?>(null) }
     var level by remember { mutableStateOf<Int?>(null) }
     var games by remember { mutableStateOf<List<Game>>(emptyList()) }
+    var isRefreshing by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    val pullRefreshState = rememberPullRefreshState(isRefreshing, onRefresh = {
+        isRefreshing = true
+        scope.launch {
+            repo.clearCaches()
+            fetchProfileData(repo, steamId) { n, a, l, g ->
+                name = n
+                avatar = a
+                level = l
+                games = g
+                isRefreshing = false
+            }
+        }
+    })
+
     LaunchedEffect(steamId) {
-        val p = repo.getProfile(steamId)
-        name = p?.name ?: "Unknown"
-        avatar = p?.avatarUrl
-        level = p?.level
-        games = repo.getRecentlyPlayed(steamId, 5)
+        fetchProfileData(repo, steamId) { n, a, l, g ->
+            name = n
+            avatar = a
+            level = l
+            games = g
+        }
     }
 
-    BoxWithConstraints(modifier = modifier) {
+    BoxWithConstraints(modifier = modifier.pullRefresh(pullRefreshState)) {
         val width = constraints.maxWidth.toFloat()
-        val scope = rememberCoroutineScope()
         val offsetX = remember { Animatable(0f) }
         val draggableState = rememberDraggableState { delta ->
             scope.launch {
-                // Only allow dragging from left to right to go back
                 val newOffset = (offsetX.value + delta).coerceAtLeast(0f)
                 offsetX.snapTo(newOffset)
             }
@@ -94,7 +115,10 @@ fun ProfileScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Profile", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                Button(onClick = onSignOut) {
+                Button(onClick = {
+                    repo.clearCaches()
+                    onSignOut()
+                }) {
                     Text("Sign Out")
                 }
             }
@@ -114,5 +138,25 @@ fun ProfileScreen(
                 Spacer(Modifier.height(8.dp))
             }
         }
+
+        PullRefreshIndicator(
+            refreshing = isRefreshing,
+            state = pullRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
     }
+}
+
+private suspend fun fetchProfileData(
+    repo: SteamRepositoryImpl,
+    steamId: String,
+    onDataFetched: (String, String?, Int?, List<Game>) -> Unit
+) {
+    val p = repo.getProfile(steamId)
+    val name = p?.name ?: "Unknown"
+    val avatar = p?.avatarUrl
+    val level = p?.level
+    val games = repo.getRecentlyPlayed(steamId, 5)
+
+    onDataFetched(name, avatar, level, games)
 }
