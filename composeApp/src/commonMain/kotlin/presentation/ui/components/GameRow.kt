@@ -92,7 +92,17 @@ fun GameRow(game: Game, onClick: () -> Unit) {
                     .width(134.dp)
                     .height(200.dp),
                 contentScale = ContentScale.Crop,
-                onFailure = { e -> println("Failed to load image: ${e.message}") }
+                onFailure = { e ->
+                    println("Failed to load image: ${e.message}, trying fallback")
+                    KamelImage(
+                        { asyncPainterResource(data = "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${game.appId}/portrait.png") },
+                        contentDescription = null,
+                        modifier = Modifier
+                            .width(134.dp)
+                            .height(200.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                }
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {

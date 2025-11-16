@@ -133,8 +133,8 @@ fun ProfileScreen(
             Spacer(Modifier.height(16.dp))
             Text("Recently Played")
             Spacer(Modifier.height(8.dp))
-            games.forEach { g ->
-                GameRow(g, onClick = { onOpenAchievements(g) })
+            games.forEach { game ->
+                GameRow(game, onClick = { onOpenAchievements(game) })
                 Spacer(Modifier.height(8.dp))
             }
         }
